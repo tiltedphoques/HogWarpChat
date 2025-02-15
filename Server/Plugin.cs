@@ -40,13 +40,20 @@ namespace HogWarpChat
             OnChatMessage += Chat_OnChatMessage;
             chatActor = HogWarpSdk.Server.World.Spawn<BP_HogWarpChat>()!;
 
-            commands.Add("/me", SlashMe);
-            commands.Add("/house", SlashHouse);
-            commands.Add("/say", SlashDistMsg);
-            commands.Add("/shout", SlashDistMsg);
-            commands.Add("/whisper", SlashDistMsg);
+            AddCommand("/me", SlashMe);
+            AddCommand("/house", SlashHouse);
+            AddCommand("/say", SlashDistMsg);
+            AddCommand("/shout", SlashDistMsg);
+            AddCommand("/whisper", SlashDistMsg);
         }
-        public static void AddCommand(string command, Action<Player, string> action) => commands.Add(command, action);
+
+        public static void AddCommand(string command, Action<Player, string> action)
+        {
+            if (!commands.TryAdd(command, action))
+            {
+                log.Warn($"{command} command already exists!");
+            }
+        }
 
         public static void ReceiveMessage(Player player, string msg)
         {
