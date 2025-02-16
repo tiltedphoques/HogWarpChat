@@ -1,22 +1,50 @@
 ﻿using HogWarp.Replicated;
-using HogWarpChat;
 using HogWarpSdk.Game;
 using HogWarpSdk.Systems;
 using System.Numerics;
 
 namespace HogWarpChat
 {
-
-    public class Plugin
+    public class Plugin : HogWarpSdk.IPlugin
     {
+        private Logger log = new Logger("HogWarpChat");
+        public event Action<Player, string> OnChatMessage;
+        private float sayDist = 400;
+        private float shoutDist = 1000;
+        private float whisperDist = 100;
+        private BP_HogWarpChat? chatActor;
+        public bool chatMsgOverride = false;
+        private Dictionary<string, Action<Player, string>> commands = new Dictionary<string, Action<Player, string>>();
+
         public Plugin()
         {
-            var chat = new Chat();
-        }
-    }
+            OnChatMessage += Chat_OnChatMessage;
 
-    public class Chat 
-    {
+
+        }
+
+        public string Author => "HogWarp Team";
+
+        public string Name => "HogWarpChat";
+
+        public Version Version => new(1, 0);
+
+        public void PostLoad()
+        {
+            chatActor = HogWarpSdk.Server.World.Spawn<BP_HogWarpChat>()!;
+            chatActor.Plugin = this;
+
+            commands.Add("/me", SlashMe);
+            commands.Add("/house", SlashHouse);
+            commands.Add("/say", SlashDistMsg);
+            commands.Add("/shout", SlashDistMsg);
+            commands.Add("/whisper", SlashDistMsg);
+        }
+
+        public void Shutdown()
+        {
+        }
+
         enum House
         {
             Gryffindor,
@@ -26,35 +54,15 @@ namespace HogWarpChat
             Unaffiliated
         }
 
-        private static Logger log = new HogWarpSdk.Systems.Logger("HogWarpChat");
-        public static event Action<Player, string>? OnChatMessage;
-        private float sayDist = 400;
-        private float shoutDist = 1000;
-        private float whisperDist = 100;
-        private static BP_HogWarpChat? chatActor;
-        public static bool chatMsgOverride = false;
-        private static Dictionary<string, Action<Player, string>> commands = new Dictionary<string, Action<Player, string>>();
+        public void AddCommand(string command, Action<Player, string> action) => commands.Add(command, action);
 
-        public Chat()
-        {
-            OnChatMessage += Chat_OnChatMessage;
-            chatActor = HogWarpSdk.Server.World.Spawn<BP_HogWarpChat>()!;
-
-            commands.Add("/me", SlashMe);
-            commands.Add("/house", SlashHouse);
-            commands.Add("/say", SlashDistMsg);
-            commands.Add("/shout", SlashDistMsg);
-            commands.Add("/whisper", SlashDistMsg);
-        }
-        public static void AddCommand(string command, Action<Player, string> action) => commands.Add(command, action);
-
-        public static void ReceiveMessage(Player player, string msg)
+        public void ReceiveMessage(Player player, string msg)
         {
             if (OnChatMessage != null)
                 OnChatMessage.Invoke(player, msg);
         }
 
-        public static void SendMessage(Player player, string msg)
+        public void SendMessage(Player player, string msg)
         {
             if (chatActor != null)
                 chatActor.RecieveMsg(player, msg);
@@ -111,11 +119,11 @@ namespace HogWarpChat
                 {
                     SendMessage(p, "<img id=\"" + (House)player.House + "\"/><" + (House)player.House + ">" + player.Username + ": </>" + msg);
                 }
-            } 
+            }
         }
         private void Chat_OnChatMessage(Player player, string msg)
         {
-            if(!chatMsgOverride)
+            if (!chatMsgOverride)
                 BuildMessage(player, msg);
         }
     }
@@ -125,9 +133,10 @@ namespace HogWarp.Replicated
 {
     public partial class BP_HogWarpChat
     {
+        internal HogWarpChat.Plugin? Plugin { get; set; }
         public partial void SendMsg(Player player, string Message)
         {
-            Chat.ReceiveMessage(player, Message);
+            Plugin!.ReceiveMessage(player, Message);
         }
     }
 }
