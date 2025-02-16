@@ -54,9 +54,7 @@ namespace HogWarpChat
             Unaffiliated
         }
 
-        public void AddCommand(string command, Action<Player, string> action) => commands.Add(command, action);
-
-        public static void AddCommand(string command, Action<Player, string> action)
+        public void AddCommand(string command, Action<Player, string> action)
         {
             if (!commands.TryAdd(command, action))
             {
@@ -64,7 +62,7 @@ namespace HogWarpChat
             }
         }
 
-        public static void ReceiveMessage(Player player, string msg)
+        public void ReceiveMessage(Player player, string msg)
         {
             if (OnChatMessage != null)
                 OnChatMessage.Invoke(player, msg);
