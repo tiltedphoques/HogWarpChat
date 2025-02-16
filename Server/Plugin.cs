@@ -56,7 +56,15 @@ namespace HogWarpChat
 
         public void AddCommand(string command, Action<Player, string> action) => commands.Add(command, action);
 
-        public void ReceiveMessage(Player player, string msg)
+        public static void AddCommand(string command, Action<Player, string> action)
+        {
+            if (!commands.TryAdd(command, action))
+            {
+                log.Warn($"{command} command already exists!");
+            }
+        }
+
+        public static void ReceiveMessage(Player player, string msg)
         {
             if (OnChatMessage != null)
                 OnChatMessage.Invoke(player, msg);

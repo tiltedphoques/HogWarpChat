@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <Reference Include="HogWarpSdk">
-      <HintPath>F:\Games\Others\HogWarp\Server\HogWarpSdk.dll</HintPath>
+      <HintPath>HogWarpSdk.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
