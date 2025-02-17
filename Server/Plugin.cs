@@ -132,10 +132,9 @@ namespace HogWarpChat
         private void Chat_OnChatMessage(Player player, string msg, out bool cancel)
         {
             cancel = false;
-            if (cancel) { return; }
+            if (cancel) return;
             
-            if (!chatMsgOverride)
-                BuildMessage(player, msg);
+            BuildMessage(player, msg);
         }
     }
 }
