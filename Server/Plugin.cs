@@ -10,7 +10,7 @@ namespace HogWarpChat
         private Logger log = new Logger("HogWarpChat");
         public event Action<Player, string> OnChatMessage;
         private float sayDist = 400;
-        private float shoutDist = 1000;
+        private float shoutDist = 1500;
         private float whisperDist = 100;
         private BP_HogWarpChat? chatActor;
         public bool chatMsgOverride = false;
@@ -94,19 +94,21 @@ namespace HogWarpChat
         {
             float msgDist = 0;
             int msgSub = 0;
+            string msgType = "says";
 
-            if (msg.StartsWith("/say")) { msgDist = sayDist; msgSub = 5; }
-            else if (msg.StartsWith("/shout")) { msgDist = shoutDist; msgSub = 7; }
-            else { msgDist = whisperDist; msgSub = 9; }
+            if (msg.StartsWith("/say")) { msgDist = sayDist; msgSub = 5; msgType = "says"; }
+            else if (msg.StartsWith("/shout")) { msgDist = shoutDist; msgSub = 7; msgType = "shouts"; }
+            else { msgDist = whisperDist; msgSub = 9; msgType = "whispers"; }
 
             foreach (var p in HogWarpSdk.Server.PlayerSystem.Players)
             {
                 Vector3 plyPos = new Vector3(player.Position.X, player.Position.Y, player.Position.Z);
                 Vector3 pPos = new Vector3(p.Position.X, p.Position.Y, p.Position.Z);
+                var dist = plyPos - pPos;
 
-                if (Vector3.DistanceSquared(pPos, plyPos) <= msgDist)
+                if (dist.Length() <= msgDist)
                 {
-                    SendMessage(p, player.Username + ": " + msg.Substring(msgSub));
+                    SendMessage(p, player.Username + " " + msgType + ": " + msg.Substring(msgSub));
                 }
             }
         }
