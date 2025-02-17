@@ -131,9 +131,7 @@ namespace HogWarpChat
         }
         private void Chat_OnChatMessage(Player player, string msg, out bool cancel)
         {
-            cancel = false;
-            if (cancel) return;
-            
+            if (!string.IsNullOrEmpty(msg) && msg[0] == '/') return;
             BuildMessage(player, msg);
         }
     }
